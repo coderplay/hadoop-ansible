@@ -8,7 +8,6 @@
         <name>mapreduce.framework.name</name>
         <value>yarn</value>
     </property>
-
     <property>
         <name>yarn.app.mapreduce.am.staging-dir</name>
         <value>/user</value>
@@ -18,43 +17,69 @@
         <name>mapreduce.jobhistory.address</name>
         <value>{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:10020</value>
     </property>
-
     <property>
         <name>mapreduce.jobhistory.webapp.address</name>
         <value>{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:19888</value>
     </property>
-
     <property>
         <name>yarn.web-proxy.address</name>
         <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8088</value>
     </property>
 
+    <!-- MapReduce Job Configurations -->
     <property>
-        <name>mapred.map.tasks</name>
-        <value>16</value>
+      <name>mapreduce.map.java.opts</name>
+      <value>-Xmx1G -Xms512m -Djava.net.preferIPv4Stack=true</value>
     </property>
-
     <property>
-        <name>mapred.reduce.tasks</name>
-        <value>6</value>
+      <name>mapreduce.reduce.java.opts</name>
+      <value>-Xmx1G -Xms512m -Djava.net.preferIPv4Stack=true</value>
     </property>
-
     <property>
-        <name>mapreduce.task.io.sort.factor</name>
-        <value>100</value>
+      <name>mapreduce.job.reduce.slowstart.completedmaps</name>
+      <value>.90</value>
     </property>
-
     <property>
-        <name>io.sort.mb</name>
-        <value>512</value>
-        <description>Higher memory-limit while sorting data.</description>
+      <name>mapreduce.io.sort.factor</name>
+      <value>100</value>
     </property>
-
     <property>
-        <name>mapreduce.reduce.shuffle.parallelcopies</name>
-        <value>30</value>
+      <name>mapreduce.io.sort.mb</name>
+      <value>256</value>
     </property>
-
+    <property>
+      <name>mapreduce.spill.percent</name>
+      <value>0.95</value>
+    </property>
+    <property>
+      <name>mapreduce.reduce.parallel.copies</name>
+      <value>10</value>
+    </property>
+    <property>
+      <name>mapreduce.task.userlog.limit.kb</name>
+      <value>5120</value>
+      <final>true</final>
+    </property>
+    <property>
+      <name>mapreduce.jobtracker.maxtasks.per.job</name>
+      <value>10000</value>
+    </property>
+    <property>
+      <name>mapreduce.job.ubertask.enable</name>
+      <value>true</value>
+    </property>
+    <property>
+      <name>mapreduce.local.dir</name>
+      <value>{% for dir in mapreduce_local_dir %}file://{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}</value>
+    </property>
+    <property>
+      <name>mapreduce.job.maps</name>
+      <value>1</value>
+    </property>
+    <property>
+      <name>mapreduce.job.reduces</name>
+      <value>1</value>
+    </property>
     <!-- MapReduce intermediate compression -->
     <property>
         <name>mapreduce.map.output.compress</name>
@@ -64,7 +89,6 @@
         <name>mapreduce.map.output.compress.codec</name>
         <value>org.apache.hadoop.io.compress.SnappyCodec</value>
     </property>
-
     <!-- MapReduce final output compression -->
     <property>
         <name>mapreduce.output.fileoutputformat.compress</name>
@@ -79,9 +103,4 @@
         <value>BLOCK</value>
     </property>
 
-    <property>
-        <name>mapreduce.map.java.opts</name>
-        <value>-Xmx1024m</value>
-        <description>Higher Java heap for mapper to work.</description>
-    </property>
 </configuration>

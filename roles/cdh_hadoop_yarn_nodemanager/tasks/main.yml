@@ -1,14 +1,44 @@
 ---
 # file: roles/cdh_hadoop_yarn_nodemanager/tasks/main.yml
 
-- name: create the /data/yarn/local directory
-  file: path=/data/yarn/local owner=yarn group=yarn state=directory
-  tags: hadoop
-
-- name: create the /data/yarn/logs directory
-  file: path=/data/yarn/logs owner=yarn group=yarn state=directory
-  tags: hadoop
+- name: create the data directory for namenode
+  file: path={{ item }} state=directory owner=yarn group=yarn mode=0700
+  with_items:
+    - "{{ yarn_nodemanager_local_dirs }}"
+    - "{{ yarn_nodemanager_log_dirs }}"
+  tags:
+    - install-hadoop-yarn-nodemanager
+    - install-hadoop-yarn
+    - install-hadoop
 
 - name: install hadoop-yarn-nodemanager via apt
-  apt: name=hadoop-yarn-nodemanager
-  tags: hadoop
+  apt: pkg={{ item }}
+  with_items:
+    - hadoop-mapreduce
+    - hadoop-yarn-nodemanager
+  tags:
+    - install-hadoop-yarn-nodemanager
+    - install-hadoop-yarn
+    - install-hadoop
+
+- name: start hadoop-yarn-nodemanager
+  service: name=hadoop-yarn-nodemanager state=restarted
+  tags:
+    - install-hadoop-yarn-nodemanager
+    - start-hadoop-yarn-nodemanager
+    - start-hadoop-yarn
+    - start-hadoop
+
+- name: stop hadoop-yarn-nodemanager
+  service: name=hadoop-yarn-nodemanager state=stopped
+  tags:
+    - stop-hadoop-yarn-nodemanager
+    - stop-hadoop-yarn
+    - stop-hadoop
+
+- name: remove hadoop-yarn-nodemanager via apt
+  apt: name=hadoop-yarn-nodemanager state=absent
+  tags:
+    - remove-hadoop-yarn-nodemanager
+    - remove-hadoop-yarn
+    - remove-hadoop

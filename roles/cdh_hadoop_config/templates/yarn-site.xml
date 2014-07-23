@@ -4,79 +4,185 @@
 <!-- {{ ansible_managed }} -->
 
 <configuration>
-    <!-- CPU Cores -->
-    <property>
-        <name>yarn.nodemanager.resource.cpu-vcores</name>
-        <value>{{ ansible_processor_count * ansible_processor_cores * ansible_processor_threads_per_core }}</value>
-    </property>
 
-    <!-- Memory limits -->
-    <property>
-        <name>yarn.scheduler.maximum-allocation-mb</name>
-        <value>{{ ansible_memtotal_mb - 1024 }}</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.resource.memory-mb</name>
-        <value>{{ ansible_memtotal_mb - 1024 }}</value>
-    </property>
+  <!-- CPU Limits -->
+  <property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>{{ ansible_processor_count * ansible_processor_cores * ansible_processor_threads_per_core }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.minimum-allocation-vcores</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.maximum-allocation-vcores</name>
+    <value>{{ ansible_processor_count * ansible_processor_cores * ansible_processor_threads_per_core }}</value>
+  </property>
+  <!-- Memory Limits -->
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>{{ ansible_memtotal_mb - 4096 }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.minimum-allocation-mb</name>
+    <value>512</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.maximum-allocation-mb</name>
+    <value>{{ ansible_memtotal_mb - 4096 }}</value>
+  </property>
 
-    <property>
-        <name>yarn.resourcemanager.resource-tracker.address</name>
-        <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8031</value>
-    </property>
-    <property>
-        <name>yarn.resourcemanager.address</name>
-        <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8032</value>
-    </property>
-    <property>
-        <name>yarn.resourcemanager.scheduler.address</name>
-        <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8030</value>
-    </property>
-    <property>
-        <name>yarn.resourcemanager.admin.address</name>
-        <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8033</value>
-    </property>
-    <property>
-        <name>yarn.resourcemanager.webapp.address</name>
-        <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8088</value>
-    </property>
-    <property>
-        <description>Classpath for typical applications.</description>
-        <name>yarn.application.classpath</name>
-        <value>
-            $HADOOP_CONF_DIR,
-            $HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,
-            $HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,
-            $HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,
-            $YARN_HOME/*,$YARN_HOME/lib/*
-        </value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce.shuffle</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
-        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.local-dirs</name>
-        <value>/data/yarn/local</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.log-dirs</name>
-        <value>/data/yarn/logs</value>
-    </property>
-    <property>
-        <description>Where to aggregate logs</description>
-        <name>yarn.nodemanager.remote-app-log-dir</name>
-        <value>/var/log/hadoop-yarn/apps</value>
-    </property>
+  <!-- Resource Manager -->
+  <property>
+    <name>yarn.resourcemanager.resource-tracker.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8031</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8032</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.scheduler.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8030</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.admin.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8033</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8088</value>
+  </property>
 
-    <!-- Fair scheduling is a method of assigning resources to jobs such that all jobs get, on average, an equal
-    share of resources over time. When there is a single job running, that job uses the entire cluster. -->
-    <property>
-        <name>yarn.resourcemanager.scheduler.class</name>
-        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler</value>
-    </property>
+  <!-- Scheduler Configurations -->
+  <property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.user-as-default-queue</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.preemption</name>
+    <value>false</value> <!-- Preemption is experimental currently -->
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.preemption.cluster-utilization-threshold</name
+    ><value>0.8f</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.sizebasedweight</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.assignmultiple</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.max.assign</name>
+    <value>-1</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.locality.threshold.node</name>
+    <value>-1.0</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.locality.threshold.rack</name>
+    <value>-1.0</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.fair.allow-undeclared-pools</name>
+    <value>false</value>
+  </property>
+
+  <!-- Specify the Directories -->
+  <property>
+    <name>yarn.nodemanager.local-dirs</name>
+    <value>{% for dir in yarn_nodemanager_local_dirs %}file://{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.log-dirs</name>
+    <value>{% for dir in yarn_nodemanager_log_dirs %}file://{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}</value>
+  </property>
+
+  <!-- NodeManager Log Aggregation -->
+  <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir</name>
+    <value>hdfs://{{ site_name|lower }}/var/log/hadoop-yarn/apps</value>
+  </property>
+  <!-- <property> -->
+  <!--   <name>yarn.nodemanager.remote-app-log-dir</name> -->
+  <!--   <value>/var/log/hadoop-yarn/apps</value> -->
+  <!-- </property> -->
+  <property>
+    <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
+    <value>yarn_aggregated_logs</value>
+  </property>
+  <property>
+    <name>yarn.log-aggregation.retain-seconds</name>
+    <value>604800</value> <!-- 1 Week -->
+  </property>
+  <property>
+    <name>yarn.log.server.url</name>
+    <value>http://{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:19888/jobhistory/nmlogs</value>
+  </property>
+  <property>
+    <name>yarn.log-aggregation.retain-check-interval-seconds</name>
+    <value>21600</value> <!-- 6 hours / 4 times a day -->
+  </property>
+
+  <!-- Cgroup configurations -->
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.cgroups.mount</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
+    <value>/cgroup</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.cgroups.hierarchy</name>
+    <value>/hadoop-yarn</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>yarn</value>
+  </property>
+
+  <!-- WebAppProxy Configuration-->
+  <!-- <property> -->
+  <!--   <name>yarn.web-proxy.address</name> -->
+  <!--   <value>:8080</value> -->
+  <!-- </property> -->
+
+  <!-- Application Configurations -->
+  <property>
+    <description>Classpath for typical applications.</description>
+    <name>yarn.application.classpath</name>
+    <value>
+      $HADOOP_CONF_DIR,
+      $HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,
+      $HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,
+      $HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,
+      $YARN_HOME/*,$YARN_HOME/lib/*
+    </value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+
 </configuration>

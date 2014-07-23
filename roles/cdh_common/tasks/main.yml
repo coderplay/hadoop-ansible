@@ -1,29 +1,28 @@
 ---
 # file: roles/cdh_common/tasks/main.yml
 
-- name: install Google Snappy
-  shell: creates=/usr/local/lib/libsnappy.so.1.2.0 chdir=/tmp curl https://snappy.googlecode.com/files/snappy-1.1.1.tar.gz | tar xz && cd snappy-1.1.1 && CFLAGS="-funroll-loops -O2 -DNDEBUG" CXXFLAGS="-funroll-loops -O2 -DNDEBUG" ./configure && make && checkinstall -pkgname=snappy-1.1.1 --backup=no --deldoc=yes --fstrans=no --default
-  notify:
-    - ldconfig
-  tags: hadoop
+# - name: install Google Snappy
+#   shell: creates=/usr/local/lib/libsnappy.so.1.2.0 chdir=/tmp curl https://snappy.googlecode.com/files/snappy-1.1.1.tar.gz | tar xz && cd snappy-1.1.1 && CFLAGS="-funroll-loops -O2 -DNDEBUG" CXXFLAGS="-funroll-loops -O2 -DNDEBUG" ./configure && make && checkinstall -pkgname=snappy-1.1.1 --backup=no --deldoc=yes --fstrans=no --default
+#   notify:
+#     - ldconfig
+#   tags: hadoop
 
-- name: add Cloudera CDH4 repository
-  apt_repository: repo='deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4 contrib'
+- name: add Cloudera CDH5 repository
+  apt_repository: repo='deb [arch=amd64] http://archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh precise-cdh5 contrib'
   tags:
-    - hadoop
-    - hbase
-    - hive
+    - update-apt
 
-- name: add Cloudera CDH4 GPL extras repository
-  apt_repository: repo='deb [arch=amd64] http://archive.cloudera.com/gplextras/ubuntu/precise/amd64/gplextras precise-gplextras4 contrib'
+- name: add Cloudera CDH5 GPL extras repository
+  apt_repository: repo='deb [arch=amd64] http://mirror.infra.cloudera.com/archive/gplextras5/ubuntu/precise/amd64/gplextras precise-gplextras5 contrib' state=absent
   tags:
-    - hadoop
-    - hbase
-    - hive
+    - update-apt
 
-- name: add Cloudera CDH4 key
-  apt_key: url=http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key
+- name: add Cloudera CDH5 GPL extras repository
+  apt_repository: repo='deb [arch=amd64] http://archive.cloudera.com/gplextras5/ubuntu/precise/amd64/gplextras precise-gplextras5 contrib'
   tags:
-    - hadoop
-    - hbase
-    - hive
+    - update-apt
+
+- name: add Cloudera CDH5 key
+  apt_key: url=http://archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh/archive.key state=present
+  tags:
+    - update-apt

@@ -3,4 +3,29 @@
 
 - name: install hadoop-yarn-resourcemanager via apt
   apt: name=hadoop-yarn-resourcemanager
-  tags: hadoop
+  tags:
+    - install-hadoop-yarn-resourcemanager
+    - install-hadoop-yarn
+    - hadoop
+
+- name: start hadoop-yarn-resourcemanager
+  service: name=hadoop-yarn-resourcemanager state=restarted
+  tags:
+    - install-hadoop-yarn-resourcemanager
+    - start-hadoop-yarn-resourcemanager
+    - start-hadoop-yarn
+    - start-hadoop
+
+- name: stop hadoop-yarn-resourcemanager
+  service: name=hadoop-yarn-resourcemanager state=stopped
+  tags:
+    - stop-hadoop-yarn-resourcemanager
+    - stop-hadoop-yarn
+    - stop-hadoop
+
+- name: remove hadoop-yarn-resourcemanager via apt
+  apt: name=hadoop-yarn-resourcemanager state=absent
+  tags:
+    - remove-yarn-resourcemanager
+    - remove-yarn
+    - remove-hadoop

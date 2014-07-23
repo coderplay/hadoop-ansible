@@ -3,4 +3,35 @@
 <!-- {{ ansible_managed }} -->
 
 <allocations>
+  <queue name="big-etl">
+    <minResources>96000 mb,0vcores</minResources>
+    <maxResources>200000 mb,0vcores</maxResources>
+    <maxRunningApps>128</maxRunningApps>
+    <maxAMShare>0.1</maxAMShare>
+    <weight>2.0</weight>
+    <schedulingPolicy>fair</schedulingPolicy>
+    <aclSubmitApps> big-etl</aclSubmitApps>
+  </queue>
+
+  <queue name="big-analyst">
+    <minResources>128000 mb,0vcores</minResources>
+    <maxResources>160000 mb,0vcores</maxResources>
+    <maxRunningApps>64</maxRunningApps>
+    <maxAMShare>0.1</maxAMShare>
+    <weight>1.0</weight>
+    <schedulingPolicy>fair</schedulingPolicy>
+    <aclSubmitApps> big-analyst</aclSubmitApps>
+  </queue>
+
+  <queueMaxAMShareDefault>0.5</queueMaxAMShareDefault>
+  <userMaxAppsDefault>4</userMaxAppsDefault>
+
+  <queuePlacementPolicy>
+    <rule name="specified" />
+    <rule name="primaryGroup" create="false" />
+    <rule name="nestedUserQueue">
+      <rule name="secondaryGroupExistingQueue" create="false" />
+    </rule>
+    <rule name="reject" />
+  </queuePlacementPolicy>
 </allocations>

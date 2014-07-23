@@ -1,13 +1,44 @@
 ---
 # file: roles/cdh_hadoop_datanode/tasks/main.yml
 
-- name: create the /data/dfs/dn directory
-  file: path=/data/dfs/dn owner=hdfs group=hdfs state=directory
-  tags: hadoop
+- name: create the data directories for the datanode
+  file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
+  with_items:
+  - "{{ dfs_datanode_data_dir }}"
+  tags:
+    - install-hadoop-hdfs-datanode
+    - install-hadoop-hdfs
+    - install-hadoop
 
 - name: install hadoop-hdfs-datanode via apt
   apt: name=hadoop-hdfs-datanode
-  tags: hadoop
+  tags:
+    - install-hadoop-hdfs-datanode
+    - install-hadoop-hdfs
+    - install-hadoop
+
+- name: start hadoop-hdfs-datanode
+  service: name=hadoop-hdfs-datanode state=restarted
+  tags:
+    - install-hadoop-hdfs-datanode
+    - start-hadoop-hdfs-datanode
+    - start-hadoop-hdfs
+    - start-hadoop
+
+- name: stop hadoop-hdfs-datanode
+  service: name=hadoop-hdfs-datanode state=stopped
+  tags:
+    - stop-hadoop-hdfs-datanode
+    - stop-hadoop-hdfs
+    - stop-hadoop
+
+- name: remove hadoop-hdfs-datanode via apt
+  apt: name=hadoop-hdfs-datanode state=absent
+  tags:
+    - remove-hadoop-hdfs-datanode
+    - remove-hadoop-hdfs
+    - remove-hadoop
+
 
 - name: configure rsyslog for hadoop-hdfs-datanode
   template: src=rsyslog.conf dest=/etc/rsyslog.d/60-hadoop-hdfs-datanode.conf owner=root group=root mode=0644

@@ -1,0 +1,65 @@
+---
+# file: roles/cdh_hadoop_namenode_standby/tasks/main.yml
+
+- name: create the data directory for namenode
+  file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
+  with_items:
+  - "{{ dfs_namenode_name_dir }}"
+  tags:
+  - install-hadoop-hdfs-namenode
+  - install-hadoop-hdfs
+  - install-hadoop
+
+- name: install hadoop-hdfs-namenode via apt
+  apt: name=hadoop-hdfs-namenode
+  tags:
+    - install-hadoop-hdfs-namenode
+    - install-hadoop-hdfs
+    - install-hadoop
+
+- name: initialize the standby namenode
+  sudo_user: hdfs
+  shell: creates={{ item }} hdfs namenode -bootstrapStandby -force && touch {{ item }}
+  with_items:
+    - /var/run/hadoop-hdfs/namenode.standby.formatted
+  tags:
+    - install-hadoop-hdfs-namenode
+    - install-hadoop-hdfs
+    - install-hadoop
+
+- name: start hadoop-hdfs-namenode standby
+  service: name=hadoop-hdfs-namenode state=restarted
+  tags:
+    - install-hadoop-hdfs-namenode
+    - start-hadoop-hdfs-namenode
+    - start-hadoop-hdfs
+    - start-hadoop
+
+- name: stop hadoop-hdfs-namenode
+  service: name=hadoop-hdfs-namenode state=stopped
+  tags:
+    - stop-hadoop-hdfs-namenode
+    - stop-hadoop-hdfs
+    - stop-hadoop
+
+- name: remove the data directory for namenode
+  file: path={{ item }} state=absent force=yes
+  with_items:
+  - "{{ dfs_namenode_name_dir }}"
+  tags:
+  - remove-hadoop-hdfs-namenode
+  - remove-hadoop-hdfs
+  - remove-hadoop
+
+- name: remove hadoop-hdfs-namenode via apt
+  apt: name=hadoop-hdfs-namenode state=absent force=yes
+  tags:
+    - remove-hadoop-hdfs-namenode
+    - remove-hadoop-hdfs
+    - remove-hadoop-hadoop
+
+- name: configure rsyslog for hadoop-hdfs-namenode
+  template: src=rsyslog.conf dest=/etc/rsyslog.d/60-hadoop-hdfs-namenode.conf owner=root group=root mode=0644
+  tags: rsyslog
+  notify:
+    - restart rsyslog

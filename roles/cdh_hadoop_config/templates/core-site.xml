@@ -5,22 +5,45 @@
 
 <configuration>
 
-    <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://{{ site_name|lower }}</value>
-        <final>true</final>
-    </property>
+  <!-- the default path prefix used by the Hadoop FS client when none is given -->
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://{{ site_name|lower }}</value>
+  </property>
 
-    <property>
-        <name>io.file.buffer.size</name>
-        <value>131072</value>
-        <final>true</final>
-    </property>
+  <!-- The size of buffer for use in sequence files. -->
+  <property>
+    <name>io.file.buffer.size</name>
+    <value>{{ io_file_buffer_size }}</value>
+    <final>true</final>
+  </property>
 
-    <property>
-        <name>io.compression.codecs</name>
-        <value>org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.SnappyCodec</value>
-        <final>true</final>
-    </property>
+  <!-- enable trash -->
+  <property>
+    <name>fs.trash.interval</name>
+    <value>{{ fs_trash_interval }}</value>
+  </property>
+
+
+  <property>
+    <name>io.compression.codecs</name>
+    <value>org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.SnappyCodec</value>
+    <final>true</final>
+  </property>
+
+  <property>
+    <name>io.compression.codec.lzo.class</name>
+    <value>com.hadoop.compression.lzo.LzoCodec</value>
+  </property>
+
+  <!-- HTTPFS proxy user setting -->
+  <!-- <property> -->
+  <!--   <name>hadoop.proxyuser.httpfs.hosts</name> -->
+  <!--   <value>*</value> -->
+  <!-- </property> -->
+  <!-- <property> -->
+  <!--   <name>hadoop.proxyuser.httpfs.groups</name> -->
+  <!--   <value>*</value> -->
+  <!-- </property> -->
 
 </configuration>
