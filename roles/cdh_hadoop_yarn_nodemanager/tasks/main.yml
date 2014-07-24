@@ -2,7 +2,7 @@
 # file: roles/cdh_hadoop_yarn_nodemanager/tasks/main.yml
 
 - name: create the data directory for namenode
-  file: path={{ item }} state=directory owner=yarn group=yarn mode=0700
+  file: path={{ item }} state=directory owner=yarn group=yarn mode=0755
   with_items:
     - "{{ yarn_nodemanager_local_dirs }}"
     - "{{ yarn_nodemanager_log_dirs }}"
@@ -11,9 +11,17 @@
     - install-hadoop-yarn
     - install-hadoop
 
+- name: create the data directory for cgroups
+  file: path={{ yarn_nodemanager_cgroups_mount_path }}/cpu state=directory owner=yarn group=yarn mode=0755
+  tags:
+    - install-hadoop-yarn-nodemanager
+    - install-hadoop-yarn
+    - install-hadoop
+
 - name: install hadoop-yarn-nodemanager via apt
-  apt: pkg={{ item }}
+  apt: pkg={{ item }} state=present force=yes
   with_items:
+    - cgroup-bin
     - hadoop-mapreduce
     - hadoop-yarn-nodemanager
   tags:
@@ -37,7 +45,7 @@
     - stop-hadoop
 
 - name: remove hadoop-yarn-nodemanager via apt
-  apt: name=hadoop-yarn-nodemanager state=absent
+  apt: name=hadoop-yarn-nodemanager state=absent force=yes
   tags:
     - remove-hadoop-yarn-nodemanager
     - remove-hadoop-yarn

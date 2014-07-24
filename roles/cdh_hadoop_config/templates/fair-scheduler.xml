@@ -4,26 +4,26 @@
 
 <allocations>
   <queue name="big-etl">
-    <minResources>96000 mb,0vcores</minResources>
-    <maxResources>200000 mb,0vcores</maxResources>
+    <minResources>16000 mb, 16vcores</minResources>
+    <maxResources>200000 mb,64vcores</maxResources>
     <maxRunningApps>128</maxRunningApps>
-    <maxAMShare>0.1</maxAMShare>
+    <maxAMShare>0.1f</maxAMShare>
     <weight>2.0</weight>
     <schedulingPolicy>fair</schedulingPolicy>
     <aclSubmitApps> big-etl</aclSubmitApps>
   </queue>
 
   <queue name="big-analyst">
-    <minResources>128000 mb,0vcores</minResources>
-    <maxResources>160000 mb,0vcores</maxResources>
+    <minResources>16000 mb,16vcores</minResources>
+    <maxResources>160000 mb,84vcores</maxResources>
     <maxRunningApps>64</maxRunningApps>
-    <maxAMShare>0.1</maxAMShare>
+    <maxAMShare>0.1f</maxAMShare>
     <weight>1.0</weight>
     <schedulingPolicy>fair</schedulingPolicy>
     <aclSubmitApps> big-analyst</aclSubmitApps>
   </queue>
 
-  <queueMaxAMShareDefault>0.5</queueMaxAMShareDefault>
+  <queueMaxAMShareDefault>0.1f</queueMaxAMShareDefault>
   <userMaxAppsDefault>4</userMaxAppsDefault>
 
   <queuePlacementPolicy>

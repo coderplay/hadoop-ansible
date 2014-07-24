@@ -69,10 +69,6 @@
       <value>true</value>
     </property>
     <property>
-      <name>mapreduce.local.dir</name>
-      <value>{% for dir in mapreduce_local_dir %}file://{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}</value>
-    </property>
-    <property>
       <name>mapreduce.job.maps</name>
       <value>1</value>
     </property>

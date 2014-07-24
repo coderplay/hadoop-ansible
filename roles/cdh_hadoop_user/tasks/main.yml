@@ -1,35 +1,9 @@
-- name: Ensure mapred groups are present
-  group: name={{ item }} state=present
-  with_items:
-    - hadoop
-    - hdfs
-    - yarn
-    - mapred
-    - httpfs
+- name: Ensure group are present
+  group: name={{ group }} state=present
   tags:
     - create-hadoop-user
 
-- name: Add user for hadoop
-  user: name=hadoop group=hadoop state=present
-  tags:
-    - create-hadoop-user
-
-- name: Add user for hdfs
-  user: name=hdfs groups=hadoop,hdfs state=present
-  tags:
-    - create-hadoop-user
-
-- name: Add user yarn to group mapred and yarn
-  user: name=yarn groups=hadoop,mapred,yarn state=present
-  tags:
-    - create-hadoop-user
-
-- name: Add user mapred to group mapred
-  user: name=mapred groups=hadoop,mapred state=present
-  tags:
-    - create-hadoop-user
-
-- name: Add root to all groups
-  user: name=root groups=hadoop,hdfs,yarn,mapred,httpfs state=present
+- name: Add user {{ user }}
+  user: name={{ user }} group={{ group }} state=present
   tags:
     - create-hadoop-user

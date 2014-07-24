@@ -6,25 +6,18 @@
 - name: create the data directory for journal nodes edits
   file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
   with_items:
-  - "{{ dfs_journalnode_edits_dir }}"
+    - "{{ dfs_journalnode_edits_dir }}"
   tags:
-  - install-hadoop-hdfs-journalnode
-  - install-hadoop-hdfs
-  - install-hadoop
+    - install-hadoop-hdfs-journalnode
+    - install-hadoop-hdfs
+    - install-hadoop
 
 - name: install hadoop-hdfs-journalnode via apt
   apt: name=hadoop-hdfs-journalnode state=present update_cache=yes force=yes
   tags:
-  - install-hadoop-hdfs-journalnode
-  - install-hadoop-hdfs
-  - install-hadoop
-
-- name: remove hadoop-hdfs-journalnode via apt
-  apt: name=hadoop-hdfs-journalnode state=absent purge=yes
-  tags:
-  - remove-hadoop-hdfs-journalnode
-  - remove-hadoop-hdfs
-  - remove-hadoop
+    - install-hadoop-hdfs-journalnode
+    - install-hadoop-hdfs
+    - install-hadoop
 
 # - name: Cleanup the dependencies of hadoop-hdfs-journalnode
 #   shell: apt-get autoremove -y
@@ -34,8 +27,9 @@
 #   - remove-hadoop
 
 - name: start hadoop-hdfs-journalnode
-  service: name=hadoop-hdfs-journalnode state=started
+  service: name=hadoop-hdfs-journalnode state=restarted
   tags:
+    - install-hadoop-hdfs-journalnode
     - start-hadoop-hdfs-journalnode
     - start-hadoop-hdfs
     - start-hadoop
@@ -46,6 +40,13 @@
     - stop-hadoop-hdfs-journalnode
     - stop-hadoop-hdfs
     - stop-hadoop
+
+- name: remove hadoop-hdfs-journalnode via apt
+  apt: name=hadoop-hdfs-journalnode state=absent purge=yes
+  tags:
+    - remove-hadoop-hdfs-journalnode
+    - remove-hadoop-hdfs
+    - remove-hadoop
 
 - name: configure rsyslog for hadoop-hdfs-journalnode
   template: src=rsyslog.conf dest=/etc/rsyslog.d/60-hadoop-hdfs-journalnode.conf owner=root group=root mode=0644

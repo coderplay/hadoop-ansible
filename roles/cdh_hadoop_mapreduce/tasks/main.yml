@@ -1,5 +1,12 @@
 ---
+# file: roles/cdh_hadoop_mapreduce/tasks/main.yml
 
 - name: install hadoop-mapreduce via apt
-  apt: name=hadoop-mapreduce
-  tags: hadoop
+  apt: name=hadoop-mapreduce state=present force=yes
+  tags:
+    - install-hadoop-mapreduce
+
+- name: remove hadoop-mapreduce packages via apt
+  apt: name=hadoop-mapreduce state=absent force=yes
+  tags:
+    - remove-hadoop-mapreduce

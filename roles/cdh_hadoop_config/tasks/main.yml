@@ -61,13 +61,13 @@
   template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=hadoop group=hadoop mode=0644
   with_items:
     - hadoop-env.sh
-  notify:
-    - restart hadoop-hdfs-namenode
-    - restart hadoop-hdfs-journalnode
-    - restart hadoop-hdfs-datanode
-    - restart hadoop-mapreduce-historyserver
-    - restart hadoop-yarn-nodemanager
-    - restart hadoop-yarn-resourcemanager
+  # notify:
+  #   - restart hadoop-hdfs-namenode
+  #   - restart hadoop-hdfs-journalnode
+  #   - restart hadoop-hdfs-datanode
+  #   - restart hadoop-mapreduce-historyserver
+  #   - restart hadoop-yarn-nodemanager
+  #   - restart hadoop-yarn-resourcemanager
   tags:
     - update-hadoop-env
     - update-hadoop-config
@@ -116,7 +116,7 @@
     - update-hadoop-yarn-config
 
 - name: configure container executor in /etc/hadoop/conf.{{ site_name|lower }}
-  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=yarn group=yarn mode=0644
+  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=root group=root mode=0600
   with_items:
     - container-executor.cfg
   # notify:
@@ -125,3 +125,13 @@
   tags:
     - update-hadoop-yarn-executor-config
     - update-hadoop-yarn-config
+
+
+- name: configure mapreduce site
+  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=yarn group=yarn mode=0644
+  with_items:
+    - mapred-site.xml
+  tags:
+    - update-hadoop-mapreduce-site
+    - update-hadoop-mapreduce
+    - update-hadoop

@@ -54,10 +54,10 @@ yarn_nodemanager_vmem_pmem_ratio: 10
 yarn_nodemanager_resource_memory_mb: 24576
 yarn_nodemanager_pmem_check_enabled: 'true'
 yarn_nodemanager_vmem_check_enabled: 'true'
+yarn_nodemanager_cgroups_mount_path: /cgroup
 
 # mapred-site_xml
-mapreduce_map_memory_mb: 4096
-mapreduce_reduce_memory_mb: 8192
-mapreduce_map_java_opts: '-Xmx3072m'
-mapreduce_reduce_java_opts: '-Xmx6144m'
-mapreduce_jobtracker_handler_count: 128
+mapreduce_map_memory_mb: 1024
+mapreduce_reduce_memory_mb: 1024
+mapreduce_map_java_opts: '-Xmx4096m'
+mapreduce_reduce_java_opts: '-Xmx4096m'
