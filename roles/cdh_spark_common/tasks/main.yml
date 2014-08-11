@@ -1,0 +1,40 @@
+---
+# file: roles/cdh_spark_common/tasks/main.yml
+
+- name: install spark packages via apt
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - spark-core
+    - spark-python
+  tags:
+    - install-spark
+
+- name:  Create config dir for spark
+  file: path=/etc/spark/conf.{{ site_name|lower }} state=directory owner=root group=spark mode=0755
+  tags:
+    - create-spark-config
+    - update-spark-config
+    - install-spark
+
+- name: run 'update-alternatives' to install spark configuration
+  command: update-alternatives --install /etc/spark/conf spark-conf /etc/spark/conf.{{ site_name|lower }} 50
+  tags:
+    - create-spark-config
+    - update-spark-config
+    - install-spark
+
+- name: run 'update-alternatives' to set spark configuration
+  command: update-alternatives --set spark-conf /etc/spark/conf.{{ site_name|lower }}
+  tags:
+    - create-spark-config
+    - update-spark-config
+    - install-spark
+
+- name: configure core configs in /etc/spark/conf.{{ site_name|lower }}
+  template: src={{ item }} dest=/etc/spark/conf.{{ site_name|lower }}/{{ item }} owner=spark group=spark mode=0644
+  with_items:
+    - spark-defaults.conf
+    - spark-env.sh
+  tags:
+    - update-spark-config
+    - install-spark

@@ -4,3 +4,25 @@
   apt: name=hadoop-mapreduce-historyserver state=present force=yes
   tags:
     - install-hadoop-mapreduce-historyserver
+    - remove-hadoop-mapreduce
+
+- name: start hadoop-mapreduce-historyserver
+  service: name=hadoop-mapreduce-historyserver state=restarted
+  tags:
+    - start-hadoop-mapreduce-historyserver
+    - start-hadoop-mapreduce
+    - start-hadoop
+
+- name: stop hadoop-mapreduce-historyserver
+  service: name=hadoop-mapreduce-historyserver state=stopped
+  tags:
+    - stop-hadoop-mapreduce-historyserver
+    - stop-hadoop-mapreduce
+    - stop-hadoop
+
+
+- name: remove hadoop-mapreduce-historyserver via apt
+  apt: name=hadoop-mapreduce-historyserver state=absent force=yes
+  tags:
+    - remove-hadoop-mapreduce-historyserver
+    - remove-hadoop-mapreduce

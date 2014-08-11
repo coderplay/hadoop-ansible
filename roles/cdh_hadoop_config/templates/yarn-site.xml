@@ -57,7 +57,14 @@
     <name>yarn.resourcemanager.recovery.enabled</name>
     <value>false</value>
   </property>
-
+  <property>
+    <name>yarn.resourcemanager.nodes.exclude-path</name>
+    <value>/etc/hadoop/conf.{{ site_name|lower }}/yarn.hosts.exclude</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.max-completed-applications</name>
+    <value>2048</value>
+  </property>
 
   <!-- Scheduler Configurations -->
   <property>
@@ -152,7 +159,7 @@
   </property>
   <property>
     <name>yarn.nodemanager.remote-app-log-dir</name>
-    <value>hdfs://{{ site_name|lower }}/system/app-logs</value>
+    <value>hdfs://{{ site_name|lower }}{{ yarn_nodemanager_remote_app_log_dir }}</value>
   </property>
   <property>
     <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
@@ -164,7 +171,7 @@
   </property>
   <property>
     <name>yarn.log.server.url</name>
-    <value>http://{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:19888/jobhistory/nmlogs</value>
+    <value>{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:19888/jobhistory/nmlogs</value>
   </property>
   <property>
     <name>yarn.log-aggregation.retain-check-interval-seconds</name>
@@ -194,10 +201,20 @@
   </property>
 
   <!-- WebAppProxy Configuration-->
-  <!-- <property> -->
-  <!--   <name>yarn.web-proxy.address</name> -->
-  <!--   <value>:8080</value> -->
-  <!-- </property> -->
+  <property>
+    <name>yarn.web-proxy.address</name>
+    <value>{{ hostvars[groups['resourcemanager'][0]]['ansible_fqdn'] }}:8088</value>
+  </property>
+
+  <!-- Service-Level ACL Configurations -->
+  <property>
+    <name>yarn.acl.enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.admin.acl</name>
+    <value> hdpadmin</value>
+  </property>
 
   <!-- Application Configurations -->
   <property>

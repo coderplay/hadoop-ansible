@@ -6,12 +6,12 @@
   with_items:
   - "{{ dfs_namenode_name_dir }}"
   tags:
-  - install-hadoop-hdfs-namenode
-  - install-hadoop-hdfs
-  - install-hadoop
+    - install-hadoop-hdfs-namenode
+    - install-hadoop-hdfs
+    - install-hadoop
 
 - name: install hadoop-hdfs-namenode via apt
-  apt: name=hadoop-hdfs-namenode
+  apt: name=hadoop-hdfs-namenode force=yes update_cache=yes
   tags:
     - install-hadoop-hdfs-namenode
     - install-hadoop-hdfs
@@ -22,6 +22,8 @@
   shell: creates={{ item }} hdfs namenode -format -force && touch {{ item }}
   with_items:
     - /var/run/hadoop-hdfs/namenode.primary.formatted
+  environment:
+     HADOOP_LOG_DIR: /var/log/hadoop-hdfs
   tags:
     - install-hadoop-hdfs-namenode
     - install-hadoop-hdfs
@@ -41,7 +43,6 @@
     - stop-hadoop-hdfs-namenode
     - stop-hadoop-hdfs
     - stop-hadoop
-
 
 - name: remove the data directory for namenode
   file: path={{ item }} state=absent force=yes

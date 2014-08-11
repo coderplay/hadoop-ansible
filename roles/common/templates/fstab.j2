@@ -1,0 +1,4 @@
+LABEL=cloudimg-rootfs	/        ext4	defaults	0 0
+{% for disk in disks %}
+{{ disk }}   /disk{{ loop.index }}       ext4    noatime,nodiratime	0	{{ loop.index }}
+{% endfor %}

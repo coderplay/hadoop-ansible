@@ -2,5 +2,31 @@
 # file: roles/cdh_hadoop_zkfc/tasks/main.yml
 
 - name: install hadoop-hdfs-zkfc (Hadoop HDFS Zookeeper Failover Controller) via apt
-  apt: name=hadoop-hdfs-zkfc
-  tags: hadoop
+  apt: name=hadoop-hdfs-zkfc state=present force=yes
+  tags:
+    - install-hadoop-hdfs-namenode
+    - install-hadoop-hdfs-zkfs
+    - install-hadoop-hdfs
+    - install-hadoop
+
+- name: start hadoop-hdfs-zkfs
+  service: name=hadoop-hdfs-zkfs state=restarted
+  tags:
+    - install-hadoop-hdfs-zkfs
+    - start-hadoop-hdfs-zkfs
+    - start-hadoop-hdfs
+    - start-hadoop
+
+- name: stop hadoop-hdfs-zkfs
+  service: name=hadoop-hdfs-zkfs state=stopped
+  tags:
+    - stop-hadoop-hdfs-zkfs
+    - stop-hadoop-hdfs
+    - stop-hadoop
+
+- name: remove hadoop-hdfs-zkfs package
+  apt: name=hadoop-hdfs-zkfs state=absent force=yes
+  tags:
+  - remove-hadoop-hdfs-zkfs
+  - remove-hadoop-hdfs
+  - remove-hadoop

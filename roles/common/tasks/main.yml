@@ -1,8 +1,51 @@
 ---
 # file: roles/common/tasks/main.yml
 
-- name: mount / with inode_readahead_blks=128,noatime,commit=30,errors=remount-ro
-  shell: creates=/etc/fstab.bak chdir=/etc cp fstab fstab.bak && sed -i "s/ errors=remount-ro/ inode_readahead_blks=128,noatime,commit=30,errors=remount-ro/" fstab
+- name:  add fingerprint to know_hosts
+  command: ssh-keyscan {{  inventory_hostname }}
+  tags:
+    - init-ssh-key
+
+- name: umount /mnt
+  command: umount {{ item }}
+  ignore_errors: true
+  with_items:
+    - /disk1
+    - /disk2
+    - /disk3
+    - /disk4
+    - /mnt
+  tags:
+    - install-filesystem
+
+- name: Format disks
+  command: mkfs.ext4 {{ item }}
+  with_items:
+    - "{{ disks }}"
+  tags:
+    - install-filesystem
+
+- name: upload fstab
+  template: src=fstab.j2 dest=/etc/fstab owner=root group=root mode=0644
+  tags:
+    - update-filesystem-config
+    - install-filesystem
+
+- name: restart machine
+  command: reboot
+  async: 0
+  poll: 0
+  ignore_errors: true
+  tags:
+    - update-filesystem-config
+    - install-filesystem
+
+# - name: waiting for server to come back
+#   local_action: wait_for host={{ inventory_hostname }} state=started
+#   sudo: false
+#   tags:
+#     - update-filesystem-config
+#     - install-filesystem
 
 - name: write sysctl config file to /etc/sysctl.d/60-hadoop.conf
   template: src=sysctl.conf dest=/etc/sysctl.d/60-hadoop.conf owner=root group=root mode=0644
@@ -50,10 +93,9 @@
     - /etc/update-motd.d/91-release-upgrade
 
 - name: create the hosts file for all machines
-  template: backup=yes src=hosts dest=/etc/hosts
+  template: src=hosts dest=/etc/hosts backup=yes
   tags:
     - update-hosts
-    - configuration
 
 - name: configure landscape-sysinfo to hide link
   template: src=client.conf dest=/etc/landscape/client.conf owner=root group=root mode=0644

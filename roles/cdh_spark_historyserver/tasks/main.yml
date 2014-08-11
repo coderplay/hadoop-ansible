@@ -1,0 +1,18 @@
+---
+# file: roles/cdh_spark_common/tasks/main.yml
+
+- name: install spark packages via apt
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - spark-history-server
+  tags:
+    - install-spark-history-server
+    - install-spark
+
+
+- name: start spark-history-server
+  service: name=spark-history-server state=restarted
+  tags:
+    - start-spark-history-server
+    - install-spark-history-server
+    - install-spark

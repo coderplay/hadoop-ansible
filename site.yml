@@ -7,63 +7,28 @@
     - name: determine interface
       set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
       # eg. to use a eth1: ipv4_address="{{ hostvars[inventory_hostname].ansible_eth1.ipv4.address }}"
+      tags:
+        - update-hosts
 
-- hosts: all
+- hosts: journalnodes:namenodes:resourcemanager:nodemanagers:historyserver:gateways
   sudo: true
   roles:
-    - { role: kernel, when: upgrade_kernel and not ansible_kernel.startswith('3.13') }
     - common
-    - { role: postfix_mandrill, when: notify_email is defined and postfix_domain is defined and mandrill_username is defined and mandrill_api_key is defined }
-    - ganglia_monitor
-    - { role: oracle_jdk, when: jdk_installed is not defined }
-
-- hosts: all
-  sudo: true
-  roles:
-    - cdh_hadoop_user
-
-- hosts: 2_links_aggregated
-  sudo: true
-  roles:
-    - { role: 2_aggregated_links, when: bond_mode is defined and mtu is defined and ansible_virtualization_role == "host" and ansible_interfaces|length == 3 and "bond0" not in ansible_interfaces }
-
-- hosts: elasticsearch
-  sudo: true
-  roles:
-    - elasticsearch
-    - elasticsearch_curator
-
-- hosts: monitors[0]
-  sudo: true
-  roles:
-    - ganglia_metad
-    - ganglia_web
-    - kibana
-    - smokeping
-
-- hosts: all
-  sudo: true
-  roles:
-    - td_agent
-    - rsyslog_fluentd
-
-# Hadoop
-
-- hosts: zookeepers:journalnodes:resourcemanager:nodemanagers:historyserver:hbase_masters:regionservers
-  sudo: true
-  roles:
+    - oracle_jdk
     - cdh_common
-    - cdh_hadoop_config
+    - cdh_system_user
 
-- hosts: zookeepers
+- hosts: journalnodes:namenodes:resourcemanager:nodemanagers:historyserver:spark_historyserver
   sudo: true
   roles:
-    - cdh_zookeeper_server
+    - cdh_hadoop_common
+    - cdh_hadoop_config
 
 - hosts: journalnodes
   sudo: true
   roles:
     - cdh_hadoop_journalnode
+
 
 - hosts: namenode-primary
   sudo: true
@@ -71,15 +36,15 @@
     - cdh_hadoop_namenode_primary
     - cdh_hadoop_zkfc
 
-- hosts: namenode-standby
+- hosts: namenode-primary
   sudo: true
-  sudo_user: hdfs
   tasks:
-    - name: wait for the first namenode to come online
+    - name: Wait for the primary namenode to come online
       wait_for: host={{ hostvars[groups['namenode-primary'][0]]["ansible_default_ipv4"]["address"] }} port=50070
       tags:
         - install-hadoop-hdfs-namenode
-        - start-hadoop-hdfs-namenode
+        - install-hadoop-hdfs
+        - install-hadoop
 
 - hosts: namenode-standby
   sudo: true
@@ -87,82 +52,37 @@
     - cdh_hadoop_namenode_standby
     - cdh_hadoop_zkfc
 
-- hosts: namenodes[0]
+- hosts: namenode-primary
   sudo: true
   tasks:
-    - name: format hadoop-hdfs-zkfc
-      shell: creates=/data/dfs/.zkfsformatted hdfs zkfc -formatZK -force && touch /data/dfs/.zkfsformatted
+    - name: Format hadoop-hdfs-zkfc
+      sudo_user: hdfs
+      shell: creates={{ item }} hdfs zkfc -formatZK -force && touch {{ item }}
+      with_items:
+        - /var/run/hadoop-hdfs/zkfs.formatted
       tags:
-        - hadoop
-        - hbase
-        - hive
-    - name: start zkfc
+        - install-hadoop-hdfs-namenode
+        - install-hadoop-hdfs-zkfs
+        - install-hadoop-hdfs
+        - install-hadoop
+    - name: restart zkfc
       service: name=hadoop-hdfs-zkfc state=restarted
       tags:
-        - hadoop
-        - hbase
-        - hive
+        - install-hadoop-hdfs-namenode
+        - install-hadoop-hdfs
+        - install-hadoop
     - name: restart namenode
       service: name=hadoop-hdfs-namenode state=restarted
       tags:
-        - hadoop
-        - hbase
-        - hive
+        - install-hadoop-hdfs-namenode
+        - install-hadoop-hdfs
+        - install-hadoop
+
 
 - hosts: datanodes
   sudo: true
   roles:
     - cdh_hadoop_datanode
-
-- hosts: nodemanagers
-  sudo: true
-  roles:
-    - cdh_hadoop_mapreduce
-
-- hosts: hbase_masters:regionservers
-  sudo: true
-  roles:
-    - cdh_hbase_config
-
-- hosts: namenodes[0]
-  sudo: true
-  sudo_user: hdfs
-  tasks:
-    - name: create /tmp directory on the cluster
-      shell: creates=/data/dfs/.tmpdircreated hadoop fs -mkdir /tmp && touch /data/dfs/.tmpdircreated
-      tags:
-        - hadoop
-        - hadoop_fs
-    - name: make sure the /tmp directory has the correct permissions
-      shell: creates=/data/dfs/.tmpdirchowned sleep 5 && hadoop fs -chmod -R 1777 /tmp && touch /data/dfs/.tmpdirchowned
-      tags:
-        - hadoop
-        - hadoop_fs
-    - name: create a /user/history directory on the cluster
-      shell: creates=/data/dfs/.historydircreated hadoop fs -mkdir /user/history && touch /data/dfs/.historydircreated
-      tags:
-        - hadoop
-        - hadoop_fs
-    - name: make sure the /user/history directory has the correct permissions
-      shell: creates=/data/dfs/.historydirchmodded sleep 5 && hadoop fs -chmod -R 1777 /user/history && touch /data/dfs/.historydirchmodded
-      tags:
-        - hadoop
-        - hadoop_fs
-    - name: make sure the /user/history directory has the correct owner
-      shell: creates=/data/dfs/.historydirchowned sleep 5 && hadoop fs -chown yarn:mapred /user/history && touch /data/dfs/.historydirchowned
-      tags:
-        - hadoop
-        - hadoop_fs
-    - name: create the /hbase directory on the cluster
-      shell: creates=/data/dfs/.hbasedircreated hadoop fs -mkdir /hbase && touch /data/dfs/.hbasedircreated
-      tags:
-        - hbase
-        - hadoop_fs
-    - name: make sure the /hbase directory has the correct owner
-      shell: creates=/data/dfs/.hbasedirchowned sleep 5 && hadoop fs -chown hbase:hbase /hbase && touch /data/dfs/.hbasedirchowned
-      tags:
-        - hbase
-        - hadoop_fs
 
 - hosts: resourcemanager
   sudo: true
@@ -172,59 +92,40 @@
 - hosts: nodemanagers
   sudo: true
   roles:
+    - cdh_hadoop_mapreduce
     - cdh_hadoop_yarn_nodemanager
+
+
+- hosts: gateways
+  sudo: true
+  roles:
+    - cdh_hadoop_gateway
 
 - hosts: historyserver
   sudo: true
   roles:
     - cdh_hadoop_mapreduce_historyserver
-    - cdh_hadoop_yarn_proxyserver
 
-- hosts: hbase_masters
+- hosts: gateways:spark_historyserver
   sudo: true
   roles:
-    - cdh_hbase_master
+    - cdh_spark_common
 
-- hosts: regionservers
+- hosts: spark_historyserver
   sudo: true
   roles:
-    - cdh_hbase_regionserver
+    - cdh_spark_historyserver
 
-- hosts: hive_metastore
+- hosts: resourcemanager:nodemanagers
   sudo: true
   roles:
-    - { role: postgresql_server, when: hive_metastore == "postgresql" }
-    - { role: cdh_hive_postgresql_metastore, when: hive_metastore == "postgresql" }
-    - { role: mysql_server, when: hive_metastore == "mysql" }
-    - { role: cdh_hive_mysql_metastore, when: hive_metastore == "mysql" }
-    - cdh_hive_config
+    - cdh_hadoop_user
+  vars:
+    gateway: false
 
-- hosts: hive_metastore
+- hosts: gateways
   sudo: true
   roles:
-    - cdh_hive_metastore
-
-- hosts: namenodes[0]
-  sudo: true
-  sudo_user: hdfs
-  tasks:
-    - name: create a /user/hive/warehouse directory on the cluster
-      shell: creates=/data/dfs/.hivewarehousedircreated hadoop fs -mkdir /user/hive/warehouse && touch /data/dfs/.hivewarehousedircreated
-      tags:
-        - hive
-        - hadoop_fs
-    - name: make sure the /user/hive/warehouse directory has the correct permissions
-      shell: creates=/data/dfs/.hivewarehousedirchmodded sleep 5 && hadoop fs -chmod -R 1777 /user/hive/warehouse && touch /data/dfs/.hivewarehousedirchmodded
-      tags:
-        - hive
-        - hadoop_fs
-
-- hosts: presto_coordinators
-  sudo: true
-  roles:
-    - presto_coordinator
-
-- hosts: presto_workers
-  sudo: true
-  roles:
-    - presto_worker
+    - cdh_hadoop_user
+  vars:
+    gateway: true

@@ -1,0 +1,20 @@
+---
+
+users:
+  # - {  user: big-analyst   , groups: big-analyst  }
+  # - {  user: big-etl       , groups: big-analyst  }
+  # - {  user: afritsch      , groups: big-analyst  }
+  # - {  user: akaverina     , groups: big-analyst  }
+  # - {  user: akim          , groups: big-analyst  }
+  # - {  user: azkaban       , groups: big-analyst  }
+  # - {  user: cyu           , groups: big-analyst  }
+  # - {  user: lnguyen       , groups: big-analyst  }
+  # - {  user: mzhou         , groups: big-analyst  }
+  # - {  user: nye           , groups: big-analyst  }
+  # - {  user: tingwang      , groups: big-analyst  }
+  # - {  user: vkhalatyan    , groups: big-analyst  }
+  # - {  user: yidan         , groups: big-analyst  }
+  # - {  user: yishu         , groups: big-analyst  }
+  # - {  user: zwei          , groups: big-analyst  }
+  # - {  user: mzhou         , groups: hdpadmin     }
+  - {  user: big-etl       , groups: big-etl      }

@@ -1,9 +1,66 @@
 - name: Ensure group are present
-  group: name={{ group }} state=present
+  group: name={{ item.groups }} state=present
+  with_items: users
   tags:
     - create-hadoop-user
 
-- name: Add user {{ user }}
-  user: name={{ user }} group={{ group }} state=present
+- name: Add user to cluster nodes
+  user: name={{ item.user }} group={{ item.groups }} state=present append=yes createhome=no
+  with_items: users
   tags:
     - create-hadoop-user
+  when:
+    gateway == false
+
+- name: Add user to gateway
+  user: name={{ item.user }} group={{ item.groups }} state=present append=yes createhome=yes shell=/bin/bash
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true
+
+- name: create ~/.ssh directory for user
+  file: path=/home/{{ item.user }}/.ssh state=directory owner={{ item.user }} group={{ item.groups }} mode=0750
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true
+
+- name: upload authorized_keys
+  copy: src=pubkeys/{{ item.user }}.pub dest=/home/{{ item.user }}/.ssh/authorized_keys owner={{ item.user }} group={{ item.groups }} mode=0400
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true
+
+
+- name: Create hdfs directories for user
+  sudo_user: hdfs
+  shell: hdfs dfs -mkdir -p /user/{{ item.user }}
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true
+
+- name: change directory ownship for user
+  sudo_user: hdfs
+  shell: hdfs dfs -chown {{ item.user }}:{{ item.groups }} /user/{{ item.user }}
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true
+
+
+- name: change directory privilege for user
+  sudo_user: hdfs
+  shell: hdfs dfs -chmod 750 /user/{{ item.user }}
+  with_items: users
+  tags:
+    - create-hadoop-user
+  when:
+    gateway == true

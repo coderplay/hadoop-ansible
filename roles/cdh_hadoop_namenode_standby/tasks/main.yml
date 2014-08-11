@@ -1,6 +1,13 @@
 ---
 # file: roles/cdh_hadoop_namenode_standby/tasks/main.yml
 
+- name: install hadoop-hdfs-namenode via apt
+  apt: name=hadoop-hdfs-namenode force=yes update_cache=yes
+  tags:
+    - install-hadoop-hdfs-namenode
+    - install-hadoop-hdfs
+    - install-hadoop
+
 - name: create the data directory for namenode
   file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
   with_items:
@@ -10,18 +17,13 @@
   - install-hadoop-hdfs
   - install-hadoop
 
-- name: install hadoop-hdfs-namenode via apt
-  apt: name=hadoop-hdfs-namenode
-  tags:
-    - install-hadoop-hdfs-namenode
-    - install-hadoop-hdfs
-    - install-hadoop
-
 - name: initialize the standby namenode
   sudo_user: hdfs
   shell: creates={{ item }} hdfs namenode -bootstrapStandby -force && touch {{ item }}
   with_items:
     - /var/run/hadoop-hdfs/namenode.standby.formatted
+  environment:
+     HADOOP_LOG_DIR: /var/log/hadoop-hdfs
   tags:
     - install-hadoop-hdfs-namenode
     - install-hadoop-hdfs

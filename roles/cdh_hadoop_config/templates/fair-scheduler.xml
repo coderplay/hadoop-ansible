@@ -4,34 +4,34 @@
 
 <allocations>
   <queue name="big-etl">
-    <minResources>16000 mb, 16vcores</minResources>
-    <maxResources>200000 mb,64vcores</maxResources>
-    <maxRunningApps>128</maxRunningApps>
-    <maxAMShare>0.1f</maxAMShare>
+    <minResources>32000 mb, 24vcores</minResources>
+    <maxResources>360000 mb,64vcores</maxResources>
+    <maxRunningApps>64</maxRunningApps>
+    <maxAMShare>0.5f</maxAMShare>
     <weight>2.0</weight>
     <schedulingPolicy>fair</schedulingPolicy>
     <aclSubmitApps> big-etl</aclSubmitApps>
   </queue>
 
   <queue name="big-analyst">
-    <minResources>16000 mb,16vcores</minResources>
-    <maxResources>160000 mb,84vcores</maxResources>
-    <maxRunningApps>64</maxRunningApps>
-    <maxAMShare>0.1f</maxAMShare>
+    <minResources>32000 mb,16vcores</minResources>
+    <maxResources>320000 mb,84vcores</maxResources>
+    <maxRunningApps>24</maxRunningApps>
+    <maxAMShare>0.5f</maxAMShare>
     <weight>1.0</weight>
     <schedulingPolicy>fair</schedulingPolicy>
     <aclSubmitApps> big-analyst</aclSubmitApps>
   </queue>
 
-  <queueMaxAMShareDefault>0.1f</queueMaxAMShareDefault>
-  <userMaxAppsDefault>4</userMaxAppsDefault>
+  <queueMaxAMShareDefault>0.3f</queueMaxAMShareDefault>
+  <userMaxAppsDefault>24</userMaxAppsDefault>
 
   <queuePlacementPolicy>
-    <rule name="specified" />
+    <rule name="specified" create="false" />
     <rule name="primaryGroup" create="false" />
-    <rule name="nestedUserQueue">
-      <rule name="secondaryGroupExistingQueue" create="false" />
-    </rule>
+    <!-- <rule name="nestedUserQueue"> -->
+    <rule name="secondaryGroupExistingQueue" create="false" />
+    <!-- </rule> -->
     <rule name="reject" />
   </queuePlacementPolicy>
 </allocations>

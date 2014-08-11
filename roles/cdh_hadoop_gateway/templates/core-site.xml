@@ -15,6 +15,7 @@
   <property>
     <name>io.file.buffer.size</name>
     <value>{{ io_file_buffer_size }}</value>
+    <final>true</final>
   </property>
 
   <!-- enable trash -->
@@ -23,7 +24,7 @@
     <value>{{ fs_trash_interval }}</value>
   </property>
 
-  <!-- Compression configs -->
+
   <property>
     <name>io.compression.codecs</name>
     <value>org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.SnappyCodec</value>
@@ -40,9 +41,23 @@
     <final>true</final>
   </property>
 
+
+  <!-- S3 Configs -->
   <property>
-    <name>hadoop.http.staticuser.user</name>
-    <value>yarn</value>
+    <name>fs.s3.impl</name>
+    <value>org.apache.hadoop.fs.s3native.NativeS3FileSystem</value>
+  </property>
+  <property>
+    <name>fs.s3.buffer.dir</name>
+    <value>./s3-buffer</value>
+  </property>
+  <property>
+    <name>fs.s3.awsAccessKeyId</name>
+    <value>AKIAJY34YQ47DFVQ7MSQ</value>
+  </property>
+  <property>
+    <name>fs.s3.awsSecretAccessKey</name>
+    <value>K7GBewYnADiwFOOVLYyQdOFIFM+9bjW5IlWxOzva</value>
   </property>
 
 </configuration>

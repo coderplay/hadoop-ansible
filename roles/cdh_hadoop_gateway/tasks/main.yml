@@ -1,0 +1,90 @@
+---
+# file: roles/cdh_hadoop_gateway/tasks/main.yml
+
+- name: install hadoop via apt
+  apt: pkg={{ item }} state=present force=yes
+  with_items:
+    - libsnappy1
+    - libsnappy-dev
+    - liblzo2-2
+    - liblzo2-dev
+    - hadoop
+    - hadoop-hdfs
+    - hadoop-yarn
+    - hadoop-mapreduce
+    - hadoop-lzo
+  tags:
+    - install-hadoop-gateway
+    - install-hadoop
+
+
+- name: create config dir
+  command: mkdir -m 755 -p /etc/hadoop/conf.{{ site_name|lower }}
+  tags:
+    - install-hadoop-gateway
+    - update-hadoop-gateway-config
+    - update-hadoop-config
+
+- name: run 'update-alternatives' to install hadoop configuration
+  command: update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.{{ site_name|lower }} 50
+  tags:
+    - install-hadoop-gateway
+    - update-hadoop-gateway-config
+    - update-hadoop-config
+
+- name: run 'update-alternatives' to set hadoop configuration
+  command: update-alternatives --set hadoop-conf /etc/hadoop/conf.{{ site_name|lower }}
+  tags:
+    - install-hadoop-gateway
+    - update-hadoop-gateway-config
+    - update-hadoop-config
+
+- name: configure hadoop in /etc/hadoop/conf.{{ site_name|lower }}
+  template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=root group=root mode=0644
+  with_items:
+    - core-site.xml
+    - mapred-site.xml
+    # - hadoop-env.sh
+    # - hadoop-metrics2.properties
+    - hdfs-site.xml
+    # - org-xerial-snappy.properties
+    - yarn-site.xml
+  tags:
+    - install-hadoop-gateway
+    - update-hadoop-gateway-config
+    - update-hadoop-config
+
+# see http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH5/latest/CDH5-Security-Guide/cdh5sg_users_groups_verify.html
+- name: Create and configure hdfs directories
+  sudo_user: hdfs
+  shell: hdfs dfs {{ item }}
+  with_items:
+    - "-chown hdfs:hadoop /"
+    - "-chmod 755 /"
+    - "-mkdir -p /tmp"
+    - "-chmod 1777 /tmp"
+    - "-mkdir -p  {{ yarn_nodemanager_remote_app_log_dir }}"
+    - "-chown yarn:hadoop {{ yarn_nodemanager_remote_app_log_dir }}"
+    - "-chmod 1777 {{ yarn_nodemanager_remote_app_log_dir }}"
+    - "-mkdir -p {{ mapreduce_jobhistory_intermediate_done_dir }}"
+    - "-chown mapred:hadoop {{ mapreduce_jobhistory_intermediate_done_dir }}"
+    - "-chmod 1777 {{ mapreduce_jobhistory_intermediate_done_dir }}"
+    - "-mkdir -p {{ mapreduce_jobhistory_done_dir }}"
+    - "-chown mapred:hadoop {{ mapreduce_jobhistory_done_dir }}"
+    - "-chmod 750 {{ mapreduce_jobhistory_done_dir }}"
+    - "-chmod 750 {{ mapreduce_jobhistory_done_dir }}"
+    - "-mkdir -p {{ yarn_app_mapreduce_am_staging_dir }}"
+    - "-chmod 1777 {{ yarn_app_mapreduce_am_staging_dir }}"
+  tags:
+    - install-hadoop-gateway
+    - update-hadoop-system-dirs
+
+############################################  Remove Package  ##############################################
+- name: remove hadoop via apt
+  apt: pkg={{ item }} state=absent force=yes
+  with_items:
+    - hadoop
+    - hadoop-lzo
+  tags:
+    - remove-hadoop-gateway
+    - remove-hadoop

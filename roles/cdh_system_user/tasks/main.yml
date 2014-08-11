@@ -5,6 +5,7 @@
     - hdfs
     - yarn
     - mapred
+    - spark
     - httpfs
   tags:
     - create-system-user
@@ -26,6 +27,11 @@
 
 - name: Add user mapred to group mapred
   user: name=mapred groups=hadoop,mapred state=present
+  tags:
+    - create-system-user
+
+- name: Add user spark to group spark
+  user: name=spark groups=hadoop,spark state=present
   tags:
     - create-system-user
 

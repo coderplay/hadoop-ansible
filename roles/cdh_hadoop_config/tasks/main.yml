@@ -1,137 +1,73 @@
 ---
 # file: roles/cdh_hadoop_config/tasks/main.yml
 
-- name: copy /etc/hadoop/conf.empty to /etc/hadoop/conf.{{ site_name|lower }}
-  command: mkdir -m 755 -p /etc/hadoop/conf.{{ site_name|lower }}
+- name:  Create config dir for hadoop
+  file: path=/etc/hadoop/conf.{{ site_name|lower }} state=directory owner=root group=hadoop mode=0755
   tags:
-    - update-hadoop-config-dir
+    - create-hadoop-config
     - update-hadoop-config
 
 - name: run 'update-alternatives' to install hadoop configuration
   command: update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.{{ site_name|lower }} 50
   tags:
-    - update-hadoop-config-dir
+    - create-hadoop-config
     - update-hadoop-config
 
 - name: run 'update-alternatives' to set hadoop configuration
   command: update-alternatives --set hadoop-conf /etc/hadoop/conf.{{ site_name|lower }}
   tags:
-    - update-hadoop-config-dir
+    - create-hadoop-config
     - update-hadoop-config
 
-# - name: configure hadoop in /etc/hadoop/conf.{{ site_name|lower }}
-#   template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=root group=root mode=0644
-#   with_items:
-#     - core-site.xml
-#     - hadoop-env.sh
-#     - hadoop-metrics2.properties
-#     - hdfs-site.xml
-#     - org-xerial-snappy.properties
-#     - slaves
-#     - mapred-site.xml
-#     - yarn-site.xml
-#     - fair-scheduler.xml
-#   notify:
-#     - restart hadoop-hdfs-namenode
-#     - restart hadoop-hdfs-journalnode
-#     - restart hadoop-hdfs-datanode
-#     - restart hadoop-mapreduce-historyserver
-#     - restart hadoop-yarn-nodemanager
-#     - restart hadoop-yarn-resourcemanager
-#   tags:
-#     - update-hadoop-configs
-
-
-- name: configure hadoop in /etc/hadoop/conf.{{ site_name|lower }}
+- name: configure core configs in /etc/hadoop/conf.{{ site_name|lower }}
   template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=hadoop group=hadoop mode=0644
   with_items:
+    - configuration.xsl
     - core-site.xml
-  # notify:
-  #   - restart hadoop-hdfs-namenode
-  #   - restart hadoop-hdfs-journalnode
-  #   - restart hadoop-hdfs-datanode
-  #   - restart hadoop-mapreduce-historyserver
-  #   - restart hadoop-yarn-nodemanager
-  #   - restart hadoop-yarn-resourcemanager
-  tags:
-    - update-hadoop-core-site
-    - update-hadoop-config
-
-- name: configure hadoop in /etc/hadoop/conf.{{ site_name|lower }}
-  template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=hadoop group=hadoop mode=0644
-  with_items:
+    - hadoop-policy.xml
     - hadoop-env.sh
-  # notify:
-  #   - restart hadoop-hdfs-namenode
-  #   - restart hadoop-hdfs-journalnode
-  #   - restart hadoop-hdfs-datanode
-  #   - restart hadoop-mapreduce-historyserver
-  #   - restart hadoop-yarn-nodemanager
-  #   - restart hadoop-yarn-resourcemanager
+    - log4j.properties
+    - hadoop-metrics.properties
+    - hadoop-metrics2.properties
+    - slaves
   tags:
-    - update-hadoop-env
+    - update-hadoop-core-config
     - update-hadoop-config
-    - hadoop
-    - configuration
 
-- name: configure hadoop in /etc/hadoop/conf.{{ site_name|lower }}
+- name: configure hdfs configs in /etc/hadoop/conf.{{ site_name|lower }}
   template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=hdfs group=hdfs mode=0644
   with_items:
     - hdfs-site.xml
-  notify:
-    # - restart hadoop-hdfs-namenode
-    # - restart hadoop-hdfs-datanode
+    - dfs.hosts.exclude
   tags:
-    - update-hadoop-hdfs-site
-    - hadoop
-    - configuration
+    - update-hadoop-hdfs-config
+    - update-hadoop-config
 
-- name: update excluded datanodes
-  copy: src=dfs.hosts.exclude dest=/etc/hadoop/conf/dfs.hosts.exclude owner=hdfs group=hdfs mode=644
-  notify:
-    - refresh datanodes
-  tags:
-    - update-hadoop-hdfs-excludes
-
-- name: configure yarn in /etc/hadoop/conf.{{ site_name|lower }}
-  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=yarn group=yarn mode=0644
+- name: configure yarn configs in /etc/hadoop/conf.{{ site_name|lower }}
+  template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=yarn group=yarn mode=0644
   with_items:
     - yarn-site.xml
-  # notify:
-  #   - restart hadoop-yarn-resourcemanager
-  #   - restart hadoop-yarn-nodemanager
-  tags:
-    - update-hadoop-yarn-site
-    - update-hadoop-yarn-config
-
-- name: configure yarn in /etc/hadoop/conf.{{ site_name|lower }}
-  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=yarn group=yarn mode=0644
-  with_items:
+    - yarn-env.sh
+    - yarn.hosts.exclude
     - fair-scheduler.xml
-  # notify:
-  #   - restart hadoop-yarn-resourcemanager
-  #   - restart hadoop-yarn-nodemanager
+    - container-log4j.properties
   tags:
-    - update-hadoop-yarn-scheduler
     - update-hadoop-yarn-config
+    - update-hadoop-config
 
 - name: configure container executor in /etc/hadoop/conf.{{ site_name|lower }}
-  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=root group=root mode=0600
+  template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=root group=root mode=0600
   with_items:
     - container-executor.cfg
-  # notify:
-  #   - restart hadoop-yarn-resourcemanager
-  #   - restart hadoop-yarn-nodemanager
   tags:
-    - update-hadoop-yarn-executor-config
     - update-hadoop-yarn-config
+    - update-hadoop-config
 
-
-- name: configure mapreduce site
-  template: src={{ item }} dest=/etc/hadoop/conf/{{ item }} owner=yarn group=yarn mode=0644
+- name: configure mapreduce configs
+  template: src={{ item }} dest=/etc/hadoop/conf.{{ site_name|lower }}/{{ item }} owner=mapred group=mapred mode=0644
   with_items:
     - mapred-site.xml
+    - mapred-env.sh
   tags:
-    - update-hadoop-mapreduce-site
-    - update-hadoop-mapreduce
-    - update-hadoop
+    - update-hadoop-mapreduce-config
+    - update-hadoop-config

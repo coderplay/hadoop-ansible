@@ -55,15 +55,15 @@
     <value>shell(/bin/true)</value>
   </property>
 
-  <!-- Automatic failover configuration -->
-  <!-- <property> -->
-  <!--   <name>dfs.ha.automatic-failover.enabled</name> -->
-  <!--   <value>true</value> -->
-  <!-- </property> -->
-  <!-- <property> -->
-  <!--   <name>ha.zookeeper.quorum</name> -->
-  <!--   <value>{% for host in groups['zookeepers'] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %}</value> -->
-  <!-- </property> -->
+  Automatic failover configuration
+  <property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{% for host in groups['zookeepers'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}</value>
+  </property>
 
   <!-- Replication factor -->
   <property>
@@ -155,10 +155,10 @@
     <value>3000</value>
   </property>
 
-  <!-- <property> -->
-  <!--   <name>dfs.hosts.exclude</name> -->
-  <!--   <value>/etc/hadoop/conf.{{ site_name|lower }}/dfs.hosts.exclude</value> -->
-  <!-- </property> -->
+  <property>
+    <name>dfs.hosts.exclude</name>
+    <value>/etc/hadoop/conf.{{ site_name|lower }}/dfs.hosts.exclude</value>
+  </property>
 
   <property>
     <name>dfs.webhdfs.enabled</name>

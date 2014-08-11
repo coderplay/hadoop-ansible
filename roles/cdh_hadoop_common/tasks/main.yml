@@ -2,21 +2,22 @@
 # file: roles/cdh_hadoop_common/tasks/main.yml
 
 - name: install base Hadoop packages via apt
-  apt: name={{ item }} update_cache=yes
+  apt: name={{ item }} update_cache=yes state=present force=yes
   with_items:
+    - libsnappy1
+    - libsnappy-dev
+    - liblzo2-2
+    - liblzo2-dev
+    - hadoop
     - hadoop-lzo
-  tags: hadoop
-
-- name: create the /data directory
-  file: path=/data owner=hdfs group=hdfs state=directory
-  tags: hadoop
-
-- name: create the /data/dfs directory
-  file: path=/data/dfs owner=hdfs group=hdfs state=directory
-  tags: hadoop
+  tags:
+    - install-hadoop-common
+    - install-hadoop
 
 - name: remove base Hadoop packages via apt
   apt: name={{ item }} state=absent
   with_items:
     - hadoop-lzo
-  tags: remove-hadoop
+  tags:
+    - remove-hadoop-common
+    - remove-hadoop

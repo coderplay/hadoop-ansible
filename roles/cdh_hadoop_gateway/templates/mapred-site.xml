@@ -15,34 +15,30 @@
   <property>
     <name>mapreduce.jobhistory.intermediate-done-dir</name>
     <value>{{ mapreduce_jobhistory_intermediate_done_dir }}</value>
-    <final>true</final>
   </property>
   <property>
     <name>mapreduce.jobhistory.done-dir</name>
     <value>{{ mapreduce_jobhistory_done_dir }}</value>
-    <final>true</final>
   </property>
 
   <!-- Job History Server Configs  -->
   <property>
     <name>mapreduce.jobhistory.address</name>
-    <value>{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:10020</value>o
-    <final>true</final>
+    <value>{{ groups['historyserver'][0] }}:10020</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.address</name>
-    <value>{{ hostvars[groups['historyserver'][0]]['ansible_fqdn'] }}:19888</value>
-    <final>true</final>
+    <value>{{ groups['historyserver'][0] }}:19888</value>
   </property>
 
   <!-- MapReduce Job Configurations -->
   <property>
     <name>mapreduce.map.java.opts</name>
-    <value>-Xms512m -Xmx1024m -XX:NewRatio=8 -Djava.net.preferIPv4Stack=true</value>
+    <value>-Xmx1G -Xms512m -Djava.net.preferIPv4Stack=true</value>
   </property>
   <property>
     <name>mapreduce.reduce.java.opts</name>
-    <value>-Xms512m -Xmx1024m -XX:NewRatio=8 -Djava.net.preferIPv4Stack=true</value>
+    <value>-Xmx1G -Xms512m -Djava.net.preferIPv4Stack=true</value>
   </property>
   <property>
     <name>mapreduce.job.reduce.slowstart.completedmaps</name>
@@ -101,40 +97,11 @@
   </property>
   <property>
     <name>mapred.output.fileoutputformat.compress.codec</name>
-    <value>org.apache.hadoop.io.compress.DefaultCodec</value>
+    <value>org.apache.hadoop.io.compress.SnappyCodec</value>
   </property>
   <property>
     <name>mapreduce.output.fileoutputformat.compress.type</name>
     <value>BLOCK</value>
   </property>
-    <property>
-    <name>mapreduce.map.memory.mb</name>
-    <value>2048</value>
-  </property>
-  <property>
-    <name>mapreduce.reduce.memory.mb</name>
-    <value>2048</value>
-  </property>
-  <property>
-    <name>mapreduce.map.cpu.vcores</name>
-    <value>1</value>
-  </property>
-  <property>
-    <name>mapreduce.reduce.cpu.vcores</name>
-    <value>1</value>
-  </property>
-  <property>
-    <name>yarn.app.mapreduce.am.env</name>
-    <value>LD_LIBRARY_PATH=$HADOOP_COMMON_HOME/lib/native</value>
-  </property>
-  <property>
-    <name>yarn.app.mapreduce.am.resource.mb</name>
-    <value>4096</value>
-  </property>
-  <property>
-    <name>yarn.app.mapreduce.am.resource.cpu-vcores</name>
-    <value>2</value>
-  </property>
-
 
 </configuration>

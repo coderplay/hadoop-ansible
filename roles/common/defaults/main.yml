@@ -1,5 +1,11 @@
 ---
 
+disks:
+  - /dev/xvdb
+  - /dev/xvdc
+  - /dev/xvdd
+  - /dev/xvde
+
 # Using the value 1 in order to avoid swapping and OOMs, since servers should have plenty of memory.
 kernel_swappiness: 1
 

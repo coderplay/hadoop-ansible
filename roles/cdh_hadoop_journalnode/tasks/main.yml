@@ -3,14 +3,6 @@
 # see http://touk.pl/blog/en/2012/10/30/hadoop-ha-setup/ and
 # http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/HDFSHighAvailabilityWithQJM.html
 
-- name: create the data directory for journal nodes edits
-  file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
-  with_items:
-    - "{{ dfs_journalnode_edits_dir }}"
-  tags:
-    - install-hadoop-hdfs-journalnode
-    - install-hadoop-hdfs
-    - install-hadoop
 
 - name: install hadoop-hdfs-journalnode via apt
   apt: name=hadoop-hdfs-journalnode state=present update_cache=yes force=yes
@@ -19,12 +11,14 @@
     - install-hadoop-hdfs
     - install-hadoop
 
-# - name: Cleanup the dependencies of hadoop-hdfs-journalnode
-#   shell: apt-get autoremove -y
-#   tags:
-#   - remove-hadoop-hdfs-journalnode
-#   - remove-hadoop-hdfs
-#   - remove-hadoop
+- name: create the data directory for journal nodes edits
+  file: path={{ item }} state=directory owner=hdfs group=hdfs mode=0700
+  with_items:
+    - "{{ dfs_journalnode_edits_dir }}"
+  tags:
+    - install-hadoop-hdfs-journalnode
+    - install-hadoop-hdfs
+    - install-hadoop
 
 - name: start hadoop-hdfs-journalnode
   service: name=hadoop-hdfs-journalnode state=restarted
